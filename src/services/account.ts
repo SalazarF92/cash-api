@@ -1,0 +1,56 @@
+import { DataSource, Repository } from "typeorm";
+import { HttpError } from "../error/http";
+import { Account } from "../entities/account";
+
+export default class AccountService {
+  private accountRepository: Repository<Account>;
+  private queryRunner = null;
+  constructor(source: DataSource) {
+    this.accountRepository = source.getRepository(Account);
+    this.queryRunner = this.accountRepository.manager.connection.createQueryRunner();
+  }
+
+  async create() {
+    const account = await this.accountRepository.save(
+      this.accountRepository.create({
+        balance: 100,
+      })
+    );
+    return account.id;
+  }
+
+  async findById(id: string) {
+    const account = await this.accountRepository.findOne({
+      where: { id },
+    });
+
+    if (!account) throw new HttpError(404, "Account not found");
+
+    return account;
+  }
+
+  async transaction() {
+
+    return {
+      start: () => this.queryRunner.startTransaction(),
+      commit: () => this.queryRunner.commitTransaction(),
+      rollback: () => this.queryRunner.rollbackTransaction(),
+      release: () => this.queryRunner.release(),
+    };
+  }
+
+  async update(id: string, value: number) {
+    const account = await this.findById(id);
+
+
+    account.balance = account.balance + value;
+
+    console.log('account aqui', account);
+
+    await this.queryRunner.update(id, {
+      balance: account.balance,
+    });
+
+    return true
+  }
+}
