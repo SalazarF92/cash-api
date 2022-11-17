@@ -38,10 +38,9 @@ describe("TransactionService", () => {
 
   it("should create and execute transaction with success", async () => {
     const {account1, account2} = await createUsers();
-
-
+    
     const transaction = await transactionService.create(
-      { creditedAccount: account1.id, debitedAccount: account2.id },
+      { creditedAccount: account1.accountId, debitedAccount: account2.accountId },
       30
     );
 

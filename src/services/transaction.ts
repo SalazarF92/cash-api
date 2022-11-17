@@ -29,7 +29,7 @@ export default class TransactionService {
       );
     }
 
-    const { start, rollback, commit, release } =
+    const { start, rollback, commit, release, find } =
       await this.accountService.transaction();
 
     await this.transactionRepository.save(
@@ -44,7 +44,7 @@ export default class TransactionService {
 
     try {
       await this.accountService.update(withdrawFromAccount.id, -value);
-      await this.accountService.update(depositToAccount.id, value);
+      await this.accountService.update("depositToAccount.id", value);
 
       await commit();
 
@@ -63,6 +63,7 @@ export default class TransactionService {
       throw new HttpError(500, "Transaction failed");
     } finally {
       await release();
+
     }
   }
 }

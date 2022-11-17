@@ -14,7 +14,7 @@ describe("AccountService", () => {
   });
 
   const data = {
-    username: "ar",
+    username: "arii",
     password: "12345212121A",
   };
 

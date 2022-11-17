@@ -7,7 +7,8 @@ export default class AccountService {
   private queryRunner = null;
   constructor(source: DataSource) {
     this.accountRepository = source.getRepository(Account);
-    this.queryRunner = this.accountRepository.manager.connection.createQueryRunner();
+    this.queryRunner =
+      this.accountRepository.manager.connection.createQueryRunner();
   }
 
   async create() {
@@ -30,27 +31,25 @@ export default class AccountService {
   }
 
   async transaction() {
-
     return {
       start: () => this.queryRunner.startTransaction(),
       commit: () => this.queryRunner.commitTransaction(),
       rollback: () => this.queryRunner.rollbackTransaction(),
       release: () => this.queryRunner.release(),
+      find: (id: string) =>
+        this.queryRunner.manager.findOne(Account, { where: { id } }),
     };
   }
 
   async update(id: string, value: number) {
     const account = await this.findById(id);
 
-
     account.balance = account.balance + value;
 
-    console.log('account aqui', account);
+    const balance = await this.queryRunner.manager.update( Account, { id: account.id }, { balance: account.balance });
 
-    await this.queryRunner.update(id, {
-      balance: account.balance,
-    });
+    console.log("o balance", balance);
 
-    return true
+    return true;
   }
 }
