@@ -1,13 +1,13 @@
 import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
 import { Account } from "./account";
-import { Base } from "./base/base.entity";
+import { Base } from "../base/base.entity";
 
 @Entity({ name: "transactions" })
 export class Transaction extends Base {
-  @Column({ name: "debited_account", nullable: false })
+  @Column({ name: "debited_account"})
   debitedAccount: string;
 
-  @Column({ name: "credited_account", nullable: false })
+  @Column({ name: "credited_account"})
   creditedAccount: string;
 
   @Column({ nullable: false })

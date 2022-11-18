@@ -1,11 +1,12 @@
 import { DataSource, Repository } from "typeorm";
 import { compareSync, hashSync } from "bcryptjs";
 import { HttpError } from "../error/http";
-import jwt from "jsonwebtoken";
+import * as jose from "jose";
 import { JWT_SECRET } from "../settings";
 import { User } from "../entities/user";
 import AccountService from "./account";
 import { validate } from "class-validator";
+import { createSecretKey } from "crypto";
 
 export default class UserService {
   private userRepository: Repository<User>;
@@ -73,9 +74,14 @@ export default class UserService {
     return user;
   }
 
-  private generateSessionToken(payload: any) {
-    return jwt.sign(payload, JWT_SECRET, {
-      expiresIn: "1 day",
-    });
+  private async generateSessionToken(payload: any) {
+    
+    const token = await new jose.SignJWT(payload)
+      .setProtectedHeader({ alg: "HS256" })
+      .setIssuedAt()
+      .setExpirationTime("24h")
+      .sign(createSecretKey(JWT_SECRET, "utf-8"));
+
+    return token;
   }
 }

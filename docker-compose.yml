@@ -1,0 +1,17 @@
+version: '3'
+
+services: 
+  postgres: 
+    container_name: ngcash-database
+    image: postgres
+    environment: 
+      POSTGRES_USER: cashier
+      POSTGRES_PASSWORD: cashier
+      POSTGRES_PORT: 5432
+      POSTGRES_DATABASE: ngcash
+    ports: 
+      - "5432:5432"
+    expose:
+      - "5432"
+    volumes:
+      - ./data:/var/lib/postgresql/data

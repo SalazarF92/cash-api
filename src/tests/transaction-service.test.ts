@@ -1,3 +1,4 @@
+import { setupDataSource } from "./db-factory";
 import { Transaction } from "@/entities/transaction";
 import AccountService from "@/services/account";
 import UserService from "@/services/user";
@@ -5,7 +6,8 @@ import { DataSource } from "typeorm";
 import { Account } from "../entities/account";
 import { User } from "../entities/user";
 import TransactionService from "../services/transaction";
-import { setupDataSource } from "./db-factory";
+import authMiddleware from "@/middlewares/authMiddleware";
+import { NextFunction, Request, Response } from "express";
 
 describe("TransactionService", () => {
   let source: DataSource;
@@ -18,6 +20,11 @@ describe("TransactionService", () => {
     userService = new UserService(source);
     transactionService = new TransactionService(source);
   });
+
+    beforeEach(async () => {
+      jest.setTimeout(20000)
+  });
+
 
   const user1 = {
     username: "user1",
@@ -33,19 +40,18 @@ describe("TransactionService", () => {
     const account1 = await userService.create(user1);
     const account2 = await userService.create(user2);
 
-    return {account1, account2};
+    return { account1, account2 };
   }
 
   it("should create and execute transaction with success", async () => {
-    const {account1, account2} = await createUsers();
-    
+    const { account1, account2 } = await createUsers();
+
     const transaction = await transactionService.create(
-      { creditedAccount: account1.accountId, debitedAccount: account2.accountId },
+      account1.accountId,
+      account2.accountId,
       30
     );
 
     expect(transaction).toBeInstanceOf(Transaction);
-
-    
   });
 });

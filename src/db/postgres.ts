@@ -10,7 +10,7 @@ const connection = new DataSource({
   username: DB_USER,
   password: DB_PASSWORD,
   database: DB_NAME,
-  entities: [__dirname + "../entities/*{.ts,.js}"],
+  entities: ["src/entities/**/*.{ts,js}"],
   synchronize: true,
   logging: false,
 });

@@ -32,6 +32,7 @@ export const setupDataSource = async (entities: any[]) => {
 
   await source.initialize();
   await source.synchronize();
+  await source.createQueryRunner().connect()
 
   return source;
 };

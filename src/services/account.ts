@@ -1,14 +1,13 @@
-import { DataSource, Repository } from "typeorm";
+import { DataSource, QueryRunner, Repository } from "typeorm";
 import { HttpError } from "../error/http";
 import { Account } from "../entities/account";
 
 export default class AccountService {
   private accountRepository: Repository<Account>;
-  private queryRunner = null;
+  private queryRunner: QueryRunner;
   constructor(source: DataSource) {
     this.accountRepository = source.getRepository(Account);
-    this.queryRunner =
-      this.accountRepository.manager.connection.createQueryRunner();
+    this.queryRunner = source.createEntityManager().queryRunner;
   }
 
   async create() {
@@ -31,13 +30,13 @@ export default class AccountService {
   }
 
   async transaction() {
-    return {
+    this.queryRunner = this.accountRepository.manager.connection.createQueryRunner();
+    return { 
+      connect: () => this.queryRunner.connect(),
       start: () => this.queryRunner.startTransaction(),
       commit: () => this.queryRunner.commitTransaction(),
       rollback: () => this.queryRunner.rollbackTransaction(),
       release: () => this.queryRunner.release(),
-      find: (id: string) =>
-        this.queryRunner.manager.findOne(Account, { where: { id } }),
     };
   }
 
@@ -46,10 +45,8 @@ export default class AccountService {
 
     account.balance = account.balance + value;
 
-    const balance = await this.queryRunner.manager.update( Account, { id: account.id }, { balance: account.balance });
-
-    console.log("o balance", balance);
-
+    await this.queryRunner.manager.save(account);
+    
     return true;
   }
 }

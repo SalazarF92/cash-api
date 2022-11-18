@@ -1,7 +1,14 @@
 import express from "express";
+import { PORT } from "./settings";
 
-const app = express();
+async function run() {
+  const app = express();
 
-app.listen(process.env.PORT || 3000, () => {
-  console.log(`Server is running in port ${process.env.PORT || 3000}`);
-});
+  await import("./express-loader").then((x) => x.default({ app }));
+
+  app.listen(3000, () => {
+    console.log(`Server is running in port ${3000}`);
+  });
+}
+
+run()

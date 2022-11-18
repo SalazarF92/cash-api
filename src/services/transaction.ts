@@ -2,6 +2,7 @@ import { DataSource, Repository } from "typeorm";
 import AccountService from "./account";
 import { Transaction } from "@/entities/transaction";
 import { HttpError } from "@/error/http";
+import validation from "@/validation/transaction";
 
 export default class TransactionService {
   private accountService: AccountService;
@@ -11,10 +12,7 @@ export default class TransactionService {
     this.transactionRepository = source.getRepository(Transaction);
   }
 
-  async create(
-    { creditedAccount, debitedAccount }: Partial<Transaction>,
-    value: number
-  ) {
+  async create(creditedAccount: string, debitedAccount: string, value: number) {
     const withdrawFromAccount = await this.accountService.findById(
       debitedAccount
     );
@@ -29,10 +27,10 @@ export default class TransactionService {
       );
     }
 
-    const { start, rollback, commit, release, find } =
+    const { connect, start, rollback, commit, release } =
       await this.accountService.transaction();
 
-    await this.transactionRepository.save(
+    const transaction = await this.transactionRepository.save(
       this.transactionRepository.create({
         creditedAccount,
         debitedAccount,
@@ -40,30 +38,25 @@ export default class TransactionService {
       })
     );
 
+    await connect()
     await start();
 
     try {
+
+      validation(withdrawFromAccount, depositToAccount, value);
+
       await this.accountService.update(withdrawFromAccount.id, -value);
-      await this.accountService.update("depositToAccount.id", value);
+      await this.accountService.update(depositToAccount.id, value);
 
       await commit();
-
-      const transaction = await this.transactionRepository.findOne({
-        where: {
-          creditedAccount,
-          debitedAccount,
-        },
-      });
 
       return transaction;
     } catch (error) {
       await rollback();
-      const test = await this.accountService.findById(debitedAccount);
-      console.log("afterRollback", test);
-      throw new HttpError(500, "Transaction failed");
+      throw new HttpError(error.status, error.message);
     } finally {
       await release();
-
     }
   }
 }
+
