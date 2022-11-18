@@ -38,13 +38,15 @@ export default class UserService {
     });
 
     if (usernameAlreadExists)
-      throw new HttpError(400, "Username já cadastrado");
+
+    throw new HttpError(400, "Username já cadastrado");
 
     const validation = this.userRepository.create({ username, password });
 
     const errors = await validate(validation);
+
     if (errors.length > 0) {
-      throw new Error(`${errors[0].constraints}`);
+      throw new HttpError(400 ,errors[0].constraints);
     }
     const hashedPassword = hashSync(password, 12 + 1);
     validation.password = hashedPassword;
