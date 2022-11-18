@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
-import { Account } from "./account";
+import { Account } from "./account.entity";
 import { Base } from "../base/base.entity";
 
 @Entity({ name: "transactions" })

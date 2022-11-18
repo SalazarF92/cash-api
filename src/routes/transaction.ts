@@ -14,4 +14,14 @@ export default function Transaction(app: Router) {
 
     res.status(200).json(user);
   });
+
+  route.get('/list', authMiddleware, async (req: any, res) => {
+
+    const userId = req.id;
+    const type = req.query.type;
+
+    const list = await transactionService.filterTransactionsByAccount(userId, type);
+
+    res.status(200).json(list);
+  }	);
 }

@@ -3,7 +3,7 @@ import { compareSync, hashSync } from "bcryptjs";
 import { HttpError } from "../error/http";
 import * as jose from "jose";
 import { JWT_SECRET } from "../settings";
-import { User } from "../entities/user";
+import { User } from "../entities/user.entity";
 import AccountService from "./account";
 import { validate } from "class-validator";
 import { createSecretKey } from "crypto";

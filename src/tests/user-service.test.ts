@@ -1,6 +1,6 @@
 import { DataSource } from "typeorm";
-import { Account } from "../entities/account";
-import { User } from "../entities/user";
+import { Account } from "../entities/account.entity";
+import { User } from "../entities/user.entity";
 import UserService from "../services/user";
 import { setupDataSource } from "./db-factory";
 

@@ -1,6 +1,6 @@
 import { DataSource, QueryRunner, Repository } from "typeorm";
 import { HttpError } from "../error/http";
-import { Account } from "../entities/account";
+import { Account } from "../entities/account.entity";
 
 export default class AccountService {
   private accountRepository: Repository<Account>;

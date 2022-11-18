@@ -16,7 +16,6 @@ export default function User(app: Router) {
     res.status(200).json(user);
   });
 
-
   route.post("/login", async (req: any, res: any) => {
     const { username, password } = req.body;
 
@@ -25,10 +24,8 @@ export default function User(app: Router) {
     res.status(200).json(sessionToken);
   });
 
-  route.get("/me", authMiddleware,async (req: any, res: any) => {
-    const { id } = req.params;
-
-    const myData = await userService.findOneById(id);
+  route.get("/me", authMiddleware, async (req: any, res: any) => {
+    const myData = await userService.findOneById(req.id);
 
     res.status(200).json(myData);
   });
