@@ -21,6 +21,7 @@ export default class UserService {
 
     if (!user) throw new HttpError(404, "User not found");
 
+
     const isPasswordValid = compareSync(password, user.password);
 
     if (!isPasswordValid) throw new HttpError(400, "Invalid password");

@@ -1,4 +1,4 @@
-import { DataSource, QueryRunner, Repository } from "typeorm";
+import { DataSource, Not, QueryRunner, Repository } from "typeorm";
 import { HttpError } from "../error/http";
 import { Account } from "../entities/account.entity";
 
@@ -17,6 +17,11 @@ export default class AccountService {
       })
     );
     return account.id;
+  }
+
+  async getAll(id: string) {
+    const accounts = await this.accountRepository.find({where: {id: Not(id)}});
+    return accounts;
   }
 
   async findById(id: string) {

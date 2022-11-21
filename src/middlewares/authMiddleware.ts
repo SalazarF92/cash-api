@@ -1,6 +1,6 @@
 import { HttpError } from "@/error/http";
 import { JWT_SECRET } from "@/settings";
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Response } from "express";
 import * as jose from "jose";
 
 const authMiddleware = async (
