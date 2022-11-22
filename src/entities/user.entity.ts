@@ -13,13 +13,13 @@ export class User extends Base {
   @Matches(/^(?=.*[A-Z])(?=.*[0-9])/, {
     message: "Password must contain at least 1 capital letter and 1 number",
   })
-  @Column()
+  @Column({ select: false })
   password: string;
 
   @Column({ name: "account_id", nullable: true })
   accountId: string;
 
-  @OneToOne(() => Account, (account) => account.id)
+  @OneToOne(() => Account, (account) => account)
   @JoinColumn({ name: "account_id" })
   account: Account;
 }

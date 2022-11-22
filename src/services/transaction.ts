@@ -32,7 +32,6 @@ export default class TransactionService {
 
     validation(withdrawFromAccount, depositToAccount, value);
 
-
     const { connect, start, rollback, commit, release } =
       await this.accountService.transaction();
 
@@ -41,7 +40,7 @@ export default class TransactionService {
       await start();
 
       await this.accountService.update(withdrawFromAccount.id, -value);
-      await this.accountService.update(depositToAccount.id, value);
+      await this.accountService.update(depositToAccount.id, +value);
 
       await commit();
 
@@ -52,11 +51,10 @@ export default class TransactionService {
           value,
           status: "success",
         })
-        );
+      );
 
-        return transaction;
-        // this.transactionRepository.update(transaction.id, { status: "success" });
-
+      return transaction;
+      // this.transactionRepository.update(transaction.id, { status: "success" });
     } catch (error) {
       await rollback();
 
@@ -67,14 +65,68 @@ export default class TransactionService {
     }
   }
 
-  async filterTransactionsByAccount(userId: string, type: 'creditedAccount' | 'debitedAccount') {
-
+  async filterTransactionsByAccount(userId: string, type: string) {
     const user = await this.userService.findOneById(userId);
 
-    const transactions = await this.transactionRepository.find({
-      where: { [type]: user.accountId },
-    });
+    const camelToSnakeCase = (str) =>
+      str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+    const converted = camelToSnakeCase(type);
 
-    return transactions;
+    if (type == "creditedAccount" || type == "debitedAccount") {
+      const queryType = this.transactionRepository.query(
+        `
+        select t.created_at as "createdAt"
+        ,t.id
+        ,t.value
+        ,t.status
+        ,t.credited_account as "creditedAccount"
+        ,t.debited_account as "debitedAccount"
+        ,u.username as "creditedUser"
+        ,u2.username as "debitedUser"
+        from transactions as t
+        inner join users as u on t.credited_account = u.account_id
+        inner join users as u2 on t.debited_account = u2.account_id
+        where t.${converted} = $1;`,
+        [user.accountId]
+      );
+      return queryType;
+    }
+
+    const queryAll = this.transactionRepository.query(
+      `
+      select t.created_at as "createdAt"
+      ,t.id
+      ,t.value
+      ,t.status
+      ,t.credited_account as "creditedAccount"
+      ,t.debited_account as "debitedAccount"
+      ,u.username as "creditedUser"
+      ,u2.username as "debitedUser"
+      from transactions as t
+      inner join users as u on t.credited_account = u.account_id
+      inner join users as u2 on t.debited_account = u2.account_id
+      where t.credited_account = $1
+      or t.debited_account = $1
+      order by t.created_at desc;
+      `,
+      [user.accountId]
+    );
+
+    return queryAll;
+
+    // return type == "credited_account" || type == "debited_account"
+    //   ? queryType
+    //   : queryAll;
+
+    // const transactions = this.transactionRepository;
+
+    // return type == "creditedAccount" || type == "debitedAccount"
+    //   ? transactions.find({ where: { [type]: user.accountId } })
+    //   : transactions.find({
+    //       where: [
+    //         { creditedAccount: user.accountId },
+    //         { debitedAccount: user.accountId },
+    //       ],
+    //     });
   }
 }

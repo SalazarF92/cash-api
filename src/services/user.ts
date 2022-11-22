@@ -17,10 +17,15 @@ export default class UserService {
   }
 
   public async login(username: string, password: string) {
-    const user = await this.userRepository.findOne({ where: { username } });
+
+    const user = await this.userRepository
+    .createQueryBuilder("user")
+    .addSelect(["user.password"])
+    .where("user.username = :username", { username })
+    .getOne();
+    // const user = await this.userRepository.findOne({ where: { username } });
 
     if (!user) throw new HttpError(404, "User not found");
-
 
     const isPasswordValid = compareSync(password, user.password);
 
@@ -39,15 +44,14 @@ export default class UserService {
     });
 
     if (usernameAlreadExists)
-
-    throw new HttpError(400, "Username já cadastrado");
+      throw new HttpError(400, "Username já cadastrado");
 
     const validation = this.userRepository.create({ username, password });
 
     const errors = await validate(validation);
 
     if (errors.length > 0) {
-      throw new HttpError(400 ,errors[0].constraints);
+      throw new HttpError(400, errors[0].constraints);
     }
     const hashedPassword = hashSync(password, 12 + 1);
     validation.password = hashedPassword;
@@ -67,10 +71,16 @@ export default class UserService {
     return userWithAccount;
   }
 
-  public async findOneById(id: string) {
-    const user = await this.userRepository.findOne({
-      where: { id },
-    });
+  public async findOneById(id: string, withPasword = false) {
+
+    const user = this.userRepository
+      .createQueryBuilder("user")
+      .addSelect(withPasword ? ["user.password"] : [])
+      .leftJoinAndSelect("user.account", "account")
+      .where("user.id = :id", { id })
+      .getOne();
+
+      
 
     if (!user) throw new HttpError(404, "User not found");
 
@@ -78,7 +88,6 @@ export default class UserService {
   }
 
   private async generateSessionToken(payload: any) {
-    
     const token = await new jose.SignJWT(payload)
       .setProtectedHeader({ alg: "HS256" })
       .setIssuedAt()

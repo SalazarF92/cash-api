@@ -25,7 +25,7 @@ export default function User(app: Router) {
   });
 
   route.get("/me", authMiddleware, async (req: any, res: any) => {
-    const myData = await userService.findOneById(req.id);
+    const myData = await userService.findOneById(req.id, false);
 
     res.status(200).json(myData);
   });

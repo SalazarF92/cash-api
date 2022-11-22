@@ -1,4 +1,4 @@
-import { DataSource, Not, QueryRunner, Repository } from "typeorm";
+import { DataSource, getManager, Not, QueryRunner, Repository } from "typeorm";
 import { HttpError } from "../error/http";
 import { Account } from "../entities/account.entity";
 
@@ -20,7 +20,33 @@ export default class AccountService {
   }
 
   async getAll(id: string) {
-    const accounts = await this.accountRepository.find({where: {id: Not(id)}});
+    const accounts = await this.accountRepository.query(
+      `
+      select acc.*
+      ,u.username
+      from accounts as acc 
+      inner join users as u on acc.id = u.account_id
+      where acc.id != $1;
+    `,
+      [id]
+    );
+
+    // const accounts = this.accountRepository
+    // .createQueryBuilder("acc")
+    // .leftJoinAndSelect("acc.user", "user")
+    // .where("acc.id = :id", { id })
+    // .getMany()
+
+    // @OneToOne(() => Account, (account) => account.user)
+    // @JoinColumn({ name: "account_id" })
+
+    // account: Account;
+    // const accounts = await this.accountRepository.find({
+    //   where: { id: Not(id) },
+    //   relations: {
+    //     user: true,
+    //   },
+    // });
     return accounts;
   }
 
@@ -35,8 +61,9 @@ export default class AccountService {
   }
 
   async transaction() {
-    this.queryRunner = this.accountRepository.manager.connection.createQueryRunner();
-    return { 
+    this.queryRunner =
+      this.accountRepository.manager.connection.createQueryRunner();
+    return {
       connect: () => this.queryRunner.connect(),
       start: () => this.queryRunner.startTransaction(),
       commit: () => this.queryRunner.commitTransaction(),
@@ -51,7 +78,7 @@ export default class AccountService {
     account.balance = account.balance + value;
 
     await this.queryRunner.manager.save(account);
-    
+
     return true;
   }
 }
