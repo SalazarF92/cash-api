@@ -1,4 +1,4 @@
-import { DataSource, getManager, Not, QueryRunner, Repository } from "typeorm";
+import { DataSource, QueryRunner, Repository } from "typeorm";
 import { HttpError } from "../error/http";
 import { Account } from "../entities/account.entity";
 
@@ -31,22 +31,6 @@ export default class AccountService {
       [id]
     );
 
-    // const accounts = this.accountRepository
-    // .createQueryBuilder("acc")
-    // .leftJoinAndSelect("acc.user", "user")
-    // .where("acc.id = :id", { id })
-    // .getMany()
-
-    // @OneToOne(() => Account, (account) => account.user)
-    // @JoinColumn({ name: "account_id" })
-
-    // account: Account;
-    // const accounts = await this.accountRepository.find({
-    //   where: { id: Not(id) },
-    //   relations: {
-    //     user: true,
-    //   },
-    // });
     return accounts;
   }
 

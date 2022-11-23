@@ -65,8 +65,14 @@ export default class TransactionService {
     }
   }
 
-  async filterTransactionsByAccount(userId: string, type: string) {
+  async filterTransactionsByAccount(userId: string, query: any) {
+    const limit = query.limit ?? 10;
+    let offset = query.offset;
+    const type = query.type
+    offset = (offset - 1) * limit;
     const user = await this.userService.findOneById(userId);
+
+    console.log('tudo', query.offset, query.limit);
 
     const camelToSnakeCase = (str) =>
       str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
@@ -86,8 +92,10 @@ export default class TransactionService {
         from transactions as t
         inner join users as u on t.credited_account = u.account_id
         inner join users as u2 on t.debited_account = u2.account_id
-        where t.${converted} = $1;`,
-        [user.accountId]
+        where t.${converted} = $1
+        offset $2;
+        `,
+        [user.accountId, offset]
       );
       return queryType;
     }
@@ -107,9 +115,10 @@ export default class TransactionService {
       inner join users as u2 on t.debited_account = u2.account_id
       where t.credited_account = $1
       or t.debited_account = $1
-      order by t.created_at desc;
+      order by t.created_at desc
+      offset $2;
       `,
-      [user.accountId]
+      [user.accountId, offset]
     );
 
     return queryAll;

@@ -18,9 +18,10 @@ export default function Transaction(app: Router) {
   route.get('/list', authMiddleware, async (req: any, res) => {
 
     const userId = req.id;
-    const type = req.query.type;
 
-    const list = await transactionService.filterTransactionsByAccount(userId, type);
+    console.log(req.query)
+
+    const list = await transactionService.filterTransactionsByAccount(userId, req.query);
 
     res.status(200).json(list);
   }	);
