@@ -19,8 +19,6 @@ export default function Transaction(app: Router) {
 
     const userId = req.id;
 
-    console.log(req.query)
-
     const list = await transactionService.filterTransactionsByAccount(userId, req.query);
 
     res.status(200).json(list);

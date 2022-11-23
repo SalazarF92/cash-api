@@ -68,18 +68,17 @@ export default class TransactionService {
   async filterTransactionsByAccount(userId: string, query: any) {
     const limit = query.limit ?? 10;
     let offset = query.offset;
-    const type = query.type
+    const type = query.type;
+    if (query.offset) offset = query.offset;
     offset = (offset - 1) * limit;
     const user = await this.userService.findOneById(userId);
-
-    console.log('tudo', query.offset, query.limit);
 
     const camelToSnakeCase = (str) =>
       str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
     const converted = camelToSnakeCase(type);
 
     if (type == "creditedAccount" || type == "debitedAccount") {
-      const queryType = this.transactionRepository.query(
+      const data = await this.transactionRepository.query(
         `
         select t.created_at as "createdAt"
         ,t.id
@@ -93,14 +92,26 @@ export default class TransactionService {
         inner join users as u on t.credited_account = u.account_id
         inner join users as u2 on t.debited_account = u2.account_id
         where t.${converted} = $1
-        offset $2;
+        limit $2 offset $3;
         `,
-        [user.accountId, offset]
+        [user.accountId, limit, offset]
       );
-      return queryType;
+
+      const total = await this.transactionRepository.query(
+        `
+        select count(*) from transactions as t
+        where t.${converted} = $1;
+        `,
+        [user.accountId]
+      );
+
+      return {
+        attributes: data,
+        pagination: { limit: parseInt(limit), total: parseInt(total[0].count) },
+      };
     }
 
-    const queryAll = this.transactionRepository.query(
+    const data = await this.transactionRepository.query(
       `
       select t.created_at as "createdAt"
       ,t.id
@@ -116,26 +127,23 @@ export default class TransactionService {
       where t.credited_account = $1
       or t.debited_account = $1
       order by t.created_at desc
-      offset $2;
+      limit $2 offset $3;
       `,
-      [user.accountId, offset]
+      [user.accountId, limit, offset]
     );
 
-    return queryAll;
+    const total = await this.transactionRepository.query(
+      `
+      select count(*) from transactions as t
+      where t.credited_account = $1
+      or t.debited_account = $1;
+      `,
+      [user.accountId]
+    );
 
-    // return type == "credited_account" || type == "debited_account"
-    //   ? queryType
-    //   : queryAll;
-
-    // const transactions = this.transactionRepository;
-
-    // return type == "creditedAccount" || type == "debitedAccount"
-    //   ? transactions.find({ where: { [type]: user.accountId } })
-    //   : transactions.find({
-    //       where: [
-    //         { creditedAccount: user.accountId },
-    //         { debitedAccount: user.accountId },
-    //       ],
-    //     });
+    return {
+      attributes: data,
+      pagination: { limit: parseInt(limit), total: parseInt(total[0].count) },
+    };
   }
 }
