@@ -1,5 +1,5 @@
-import { HttpError } from "@/error/http";
-import { JWT_SECRET } from "@/settings";
+import { HttpError } from "../error/http";
+import { JWT_SECRET } from "../settings";
 import { NextFunction, Response } from "express";
 import * as jose from "jose";
 

@@ -1,4 +1,4 @@
-import authMiddleware from "@/middlewares/authMiddleware";
+import authMiddleware from "../middlewares/authMiddleware";
 import { DataSource } from "typeorm";
 import { Account } from "../entities/account.entity";
 import { User } from "../entities/user.entity";

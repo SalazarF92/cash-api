@@ -1,0 +1,18 @@
+FROM postgres
+ENV POSTGRES_USER cashier
+ENV POSTGRES_PASSWORD cashier
+ENV POSTGRES_DB ngcash
+ENV POSTGRES_HOST localhost
+COPY init.sql /docker-entrypoint-initdb.d/
+# Add hello scripts
+# ADD sayhello /sayhello
+# RUN chmod +x /sayhello
+
+# # Add docker-compose-wait tool -------------------
+# ENV WAIT_VERSION 2.7.2
+# ADD https://github.com/ufoscout/docker-compose-wait/releases/download/$WAIT_VERSION/wait /wait
+# RUN chmod +x /wait
+
+# CMD ["/sayhello"]
+
+

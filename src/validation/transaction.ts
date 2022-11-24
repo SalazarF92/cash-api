@@ -1,5 +1,5 @@
-import { HttpError } from "@/error/http";
-import { Account } from "@/types/interfaces";
+import { HttpError } from "../error/http";
+import { Account } from "../types/interfaces";
 
 const validation = (
   withdrawFromAccount: Account,

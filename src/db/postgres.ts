@@ -1,11 +1,14 @@
 //create connection with database
 
-import { DB_NAME, DB_PASSWORD, DB_PORT, DB_USER } from "@/settings";
+import { DB_NAME, DB_PASSWORD, DB_PORT, DB_USER, DB_HOST } from "../settings";
+import { myIp } from "../utils/myIp";
 import { DataSource } from "typeorm";
+
+console.log("ip: ", myIp(), "192.168.18.3");
 
 const connection = new DataSource({
   type: "postgres",
-  host: "localhost",
+  host: DB_HOST,
   port: DB_PORT,
   username: DB_USER,
   password: DB_PASSWORD,
@@ -14,6 +17,7 @@ const connection = new DataSource({
   synchronize: true,
   logging: false,
 });
+
 
 connection
   .initialize()

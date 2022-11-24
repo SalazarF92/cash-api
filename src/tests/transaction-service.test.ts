@@ -1,12 +1,12 @@
 import { setupDataSource } from "./db-factory";
-import { Transaction } from "@/entities/transaction.entity";
-import AccountService from "@/services/account";
-import UserService from "@/services/user";
+import { Transaction } from "../entities/transaction.entity";
+import AccountService from "../services/account";
+import UserService from "../services/user";
 import { DataSource } from "typeorm";
 import { Account } from "../entities/account.entity";
 import { User } from "../entities/user.entity";
 import TransactionService from "../services/transaction";
-import authMiddleware from "@/middlewares/authMiddleware";
+import authMiddleware from "../middlewares/authMiddleware";
 import { NextFunction, Request, Response } from "express";
 
 describe("TransactionService", () => {

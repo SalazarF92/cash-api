@@ -13,6 +13,7 @@
     "paths": {
       "@/*": ["./src/*"],
     },
+    "outDir": "./build",
   },
   "include": ["./src/**/*", "test"],
   "exclude": ["node_modules", "tests"]

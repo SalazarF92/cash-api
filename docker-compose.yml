@@ -1,17 +1,59 @@
 version: '3'
 
 services: 
-  postgres: 
-    container_name: ngcash-database
-    image: postgres
+  ng-postgres: 
+    container_name: ng-postgres
+    # image: postgres:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.database
     environment: 
       POSTGRES_USER: cashier
       POSTGRES_PASSWORD: cashier
       POSTGRES_PORT: 5432
-      POSTGRES_DATABASE: ngcash
+      POSTGRES_DB: ngcash
     ports: 
       - "5432:5432"
     expose:
       - "5432"
     volumes:
       - ./data:/var/lib/postgresql/data
+    networks:
+      - api-net
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:5432"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 5
+
+  ngcash:
+    container_name: ngcash
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    environment:
+      - JWT_SECRET=P4523J542905I243R402
+      - API_URL=http://localhost/
+      - PORT=5432
+      - LOCAL_URL=http://localhost:3000/
+      - SECRET_KEY=k34j2p3k423pi4234uy8293y423oihj32oi4y2304932480h234234jkp32u40
+      - DB_USER=cashier
+      - DB_PASSWORD=cashier
+      - DB_HOST=ng-postgres
+      - DB_PORT=5432
+      - DB_NAME=ngcash
+    command: npm run start
+    ports: 
+        - "3000:3000"
+    depends_on:
+      ng-postgres:
+        condition: service_healthy
+    links: 
+        - rabbit
+    networks:
+      - api-net
+networks:
+  api-net:
+    driver: bridge
+
+

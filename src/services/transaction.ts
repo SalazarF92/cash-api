@@ -1,8 +1,8 @@
 import { DataSource, Repository } from "typeorm";
 import AccountService from "./account";
-import { Transaction } from "@/entities/transaction.entity";
-import { HttpError } from "@/error/http";
-import validation from "@/validation/transaction";
+import { Transaction } from "../entities/transaction.entity";
+import { HttpError } from "../error/http";
+import validation from "../validation/transaction";
 import UserService from "./user";
 
 export default class TransactionService {
