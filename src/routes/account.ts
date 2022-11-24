@@ -1,4 +1,4 @@
-import connection from "../db/postgres";
+import connection from "../postgres";
 import authMiddleware from "../middlewares/authMiddleware";
 import AccountService from "../services/account";
 import UserService from "../services/user";

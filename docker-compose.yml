@@ -20,11 +20,6 @@ services:
       - ./data:/var/lib/postgresql/data
     networks:
       - api-net
-    # healthcheck:
-    #   test: ["CMD", "curl", "-f", "http://localhost:5432"]
-    #   interval: 30s
-    #   timeout: 10s
-    #   retries: 5
 
   ngcash:
     container_name: ngcash
@@ -34,7 +29,7 @@ services:
     environment:
       - JWT_SECRET=P4523J542905I243R402
       - API_URL=http://localhost/
-      - PORT=5432
+      - PORT=3000
       - LOCAL_URL=http://localhost:3000/
       - SECRET_KEY=k34j2p3k423pi4234uy8293y423oihj32oi4y2304932480h234234jkp32u40
       - DB_USER=cashier
@@ -46,14 +41,13 @@ services:
     ports: 
         - "3000:3000"
     depends_on:
-      ng-postgres:
-        condition: service_healthy
+      - ng-postgres
     links: 
-        - rabbit
+        - ng-postgres
     networks:
       - api-net
 networks:
   api-net:
-    driver: bridge
+
 
 

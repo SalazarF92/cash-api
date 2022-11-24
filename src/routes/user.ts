@@ -1,4 +1,4 @@
-import connection from "../db/postgres";
+import connection from "../postgres";
 import authMiddleware from "../middlewares/authMiddleware";
 import UserService from "../services/user";
 import { Router } from "express";

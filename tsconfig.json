@@ -1,19 +1,47 @@
+// {
+//   "compilerOptions": {
+//     "target": "ES6",
+//     // "strict": true,
+//     "module": "commonjs",
+//     "esModuleInterop": false,
+//     "allowJs": true,
+//     "skipLibCheck": true,
+//     "allowSyntheticDefaultImports": true,
+//     "emitDecoratorMetadata": true,
+//     "forceConsistentCasingInFileNames": true,
+//     "experimentalDecorators": true,
+//     "strictPropertyInitialization": false,
+//     "moduleResolution": "node",
+//     "baseUrl": ".",
+//     "paths": {
+//       "@/*": ["./src/*"]
+//     },
+//     "outDir": "./build"
+//   },
+//   "include": ["./src/**/*", "test"],
+//   "exclude": ["node_modules", "tests"]
+// }
+
 {
   "compilerOptions": {
-    "target": "ES2015",
-    "module": "commonjs",
-    // "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
+    "target": "es2017",
+    "lib": ["es2017", "esnext.asynciterable"],
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "forceConsistentCasingInFileNames": true,
-    "experimentalDecorators": true,
-    "strictPropertyInitialization": false,
+    "moduleResolution": "node",
+    "module": "commonjs",
+    "pretty": true,
+    "sourceMap": true,
+    "outDir": "./build",
+    "allowJs": true,
+    "noEmit": false,
+    "esModuleInterop": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-    },
-    "outDir": "./build",
+      "@/*": ["./src/*"]
+    }
   },
   "include": ["./src/**/*", "test"],
   "exclude": ["node_modules", "tests"]
