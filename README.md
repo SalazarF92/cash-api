@@ -8,7 +8,7 @@ Processo Seletivo NGCash - API
 </p>
 
 # Flavio Salazar
-<sub>*Lead Data Scientist* at Space Operations Center</sub>
+<sub>*Full Stack Developer*</sub>
 
 Descrição
 
