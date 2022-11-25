@@ -12,8 +12,10 @@ Processo Seletivo NGCash - API
 
 Descrição
 
-  API que consiste em um sistema de transação simples entre usuários utilzando Rollback
+  API que consiste em um sistema de transação simples entre usuários utilzando Rollback.
+  
   Para acessar, basta realizar a operação docker-compose up que o banco de dados e a aplicação executarão automaticamente, a partir das imagens geradas no Dockerfile.
+  
   A porta default está como 3000 para acessar a API.
 
 **Background in:** Nodejs, Express
