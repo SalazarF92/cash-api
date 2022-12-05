@@ -1,4 +1,3 @@
-// create a workflow with a node build test and deploy to heroku prod
 version: 2.1
 orbs:
   heroku: circleci/heroku@1.2.6
