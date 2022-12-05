@@ -1,56 +1,19 @@
-jobs:
-  build_and_test: # this can be any name you choose
-    executor: node/default # use the default executor defined within the orb
-    steps:
-      - checkout
-      - node/install-packages:
-          pkg-manager: yarn
-      - run:
-          command: yarn test
-          name: Run tests
-      - run:
-          command: yarn build
-          name: Build app
-      - persist_to_workspace:
-          root: ~/project
-          paths: .
-
-
-
-# version: 2.1
-# orbs:
-#   node: circleci/node@5.0.2
-#   heroku: circleci/heroku@1.2.6
-
-# jobs:
-#   build_and_test:
-#     executor: node/default
-#     steps:
-#       - checkout
-#       - node/install-packages:
-#           pkg-manager: yarn
-#       - run:
-#           command: yarn test
-#           name: Run tests
-#       - run:
-#           command: yarn build
-#           name: Build app
-#       - persist_to_workspace:
-#           root: ~/project
-#           paths:
-#             - .
-# //create a pipeline to run a workflow to test and build the app
-# workflows:
-#   version: 2
-#   build_and_test:
-#     jobs:
-#       - build_and_test
-#       - heroku/deploy-via-git:
-#           requires:
-#             - build_and_test
-#           filters:
-#             branches:
-#               only: master
-#           app-name: "your-app-name"
-#           context: "your-context-name"
-
+// create a workflow with a node build test and deploy to heroku prod
+version: 2.1
+orbs:
+  heroku: circleci/heroku@1.2.6
+workflows:
+  version: 2
+  build-test-deploy:
+    jobs:
+      - build
+      - heroku/deploy-via-git
+      - test:
+          requires:
+            - build
+      - deploy:
+          requires:
+            - test
+          filters:
+            branches:
+              only: master
