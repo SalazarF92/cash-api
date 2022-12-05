@@ -3,7 +3,7 @@ orbs:
   heroku: circleci/heroku@1.2.6
 workflows:
   version: 2
-    build_test_deploy:
+    heroku_deploy:
       jobs:
         - heroku/deploy-via-git
         - test:
