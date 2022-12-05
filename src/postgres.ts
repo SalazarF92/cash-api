@@ -1,17 +1,17 @@
 //create connection with database
 
-import { DB_NAME, DB_PASSWORD, DB_PORT, DB_USER, DB_HOST } from "./settings";
+import { PGDATABASE, PGPASSWORD, PGPORT, PGUSER, PGHOST } from "./settings";
 import { DataSource } from "typeorm";
 import "reflect-metadata";
 
 
 const connection = new DataSource({
   type: "postgres",
-  host: DB_HOST,
-  port: DB_PORT,
-  username: DB_USER,
-  password: DB_PASSWORD,
-  database: DB_NAME,
+  host: PGHOST,
+  port: PGPORT,
+  username: PGUSER,
+  password: PGPASSWORD,
+  database: PGDATABASE,
   entities: ["./entities/**/*.{ts,js}"],
   synchronize: true,
   logging: false,
