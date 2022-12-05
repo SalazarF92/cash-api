@@ -12,7 +12,7 @@ const connection = new DataSource({
   username: PGUSER,
   password: PGPASSWORD,
   database: PGDATABASE,
-  entities: ["./entities/**/*.{ts,js}"],
+  entities: ["./build/entities/**/*.{ts,js}"],
   synchronize: true,
   logging: false,
 });
