@@ -5,28 +5,33 @@
 #   heroku_deploy:
 #     jobs:
 #       - heroku/deploy-via-git
-
-
 version: 2.1
+
 orbs:
   heroku: circleci/heroku@1.2.6
+
 jobs:
-  heroku_deploy:
-    - heroku/deploy-via-git
   build:
-    working_directory: ~/repo
     docker:
-      - image: cimg/node:16.00.0
+      - image: circleci/node:14.20.0
+    working_directory: ~/repo
     steps:
       - checkout
-      - restore_cache:
-          key: dependency-cache-{{ checksum "package-lock.json" }}
+      # install dependencies
       - run:
-          name: install dependencies
+          name: Install Dependencies
           command: npm install
-      - save_cache:
-          key: dependency-cache-{{ checksum "package-lock.json" }}
-          paths:
-            - ./node_modules
       - run:
-          command: npm test
+          name: Run tests
+          command: npm run test
+
+workflows:
+  heroku_deploy:
+    jobs:
+      - build
+      - heroku/deploy-via-git: # Use the pre-configured job, deploy-via-git
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
