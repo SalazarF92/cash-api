@@ -51,7 +51,7 @@ describe("AccountService", () => {
     const account = await createUser(data);
 
     expect(account.username.length).toBeGreaterThanOrEqual(3);
-    expect(account.password).toMatch(/^(?=.*[A-Z])(?=.*[0-9])(?=.{8,})/);
+    expect(data.password).toMatch(/^(?=.*[A-Z])(?=.*[0-9])(?=.{8,})/);
     expect(account).toBeInstanceOf(User);
   });
 
