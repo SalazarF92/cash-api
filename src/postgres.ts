@@ -4,7 +4,6 @@ import { PGDATABASE, PGPASSWORD, PGPORT, PGUSER, PGHOST } from "./settings";
 import { DataSource } from "typeorm";
 import "reflect-metadata";
 
-
 const connection = new DataSource({
   type: "postgres",
   host: PGHOST,
@@ -12,7 +11,7 @@ const connection = new DataSource({
   username: PGUSER,
   password: PGPASSWORD,
   database: PGDATABASE,
-  entities: ["./build/entities/**/*.{ts,js}"],
+  entities: [`${__dirname.indexOf('src') != -1 ? './src/entities/**/*.{ts,js}' :  './build/entities/**/*.{ts,js}'}`],
   synchronize: true,
   logging: false,
 });
@@ -26,6 +25,6 @@ setTimeout(() => {
     .catch((err) => {
       console.error(`Data Source initialization error`, err);
     });
-}, 40000);
+}, 4000);
 
 export default connection;

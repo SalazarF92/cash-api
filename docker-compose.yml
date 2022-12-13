@@ -32,11 +32,11 @@ services:
       - PORT=3000
       - LOCAL_URL=http://localhost:3000/
       - SECRET_KEY=k34j2p3k423pi4234uy8293y423oihj32oi4y2304932480h234234jkp32u40
-      - DB_USER=cashier
-      - DB_PASSWORD=cashier
-      - DB_HOST=ng-postgres
-      - DB_PORT=5432
-      - DB_NAME=ngcash
+      - PGUSER=cashier
+      - PGPASSWORD=cashier
+      - PGHOST=ng-postgres
+      - PGPORT=5432
+      - PGDATABASE=ngcash
     command: npm run start
     ports: 
         - "3000:3000"

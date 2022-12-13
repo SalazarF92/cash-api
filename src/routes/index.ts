@@ -9,5 +9,9 @@ export default function routes(): Router {
   transaction(app);
   Account(app)
 
+  app.get("/", (req, res) => {
+    res.send("1.0");
+  });
+
   return app;
 }
