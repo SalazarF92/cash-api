@@ -6,8 +6,6 @@ class RabbitConnection {
   private channel: Channel;
 
   public async initialize(): Promise<void> {
-    // console.log("RabbitService initialized");
-    // this.connection = this.createConnection();
     this.connection = await connect("amqps://ltthzpmd:3w0T0lIXLCEv3he4dy0mGglnxrc5T17I@moose.rmq.cloudamqp.com/ltthzpmd");
     this.channel = await this.connection.createChannel();
     console.log("RabbitService initialized")
@@ -18,19 +16,9 @@ class RabbitConnection {
   }
 
   public getChannel(): Channel {
-    return this.channel;
+    return this.channel;z
   }
-
-  // public createConnection(name?: string) {
-  //   return new Connection({
-  //     connectionName: `cash-dev`,
-  //     dsn: "amqps://ltthzpmd:3w0T0lIXLCEv3he4dy0mGglnxrc5T17I@moose.rmq.cloudamqp.com/ltthzpmd",
-  //     exchange: "ngcash",
-  //     exchangeType: "topic",
-  //   });
-  // }
-
-  
+ 
 }
 
 export const rabbitConnection = new RabbitConnection();

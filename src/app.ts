@@ -11,10 +11,6 @@ async function run() {
   app.listen(PORT, () => {
     console.log(`Server is running in port ${PORT}`);
   });
-  
-  // router.get("/", (req, res) => {
-  //   res.send("1.0");
-  // });
 }
 
 run();
