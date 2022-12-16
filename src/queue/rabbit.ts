@@ -1,12 +1,13 @@
 // import { Connection } from "@eduzz/rabbit";
-import { Connection, Channel, connect, Message } from "amqplib";
+import { DSN_RABBIT } from "@/settings";
+import { Connection, Channel, connect } from "amqplib";
 
 class RabbitConnection {
   private connection: Connection;
   private channel: Channel;
 
   public async initialize(): Promise<void> {
-    this.connection = await connect("amqps://ltthzpmd:3w0T0lIXLCEv3he4dy0mGglnxrc5T17I@moose.rmq.cloudamqp.com/ltthzpmd");
+    this.connection = await connect(DSN_RABBIT);
     this.channel = await this.connection.createChannel();
     console.log("RabbitService initialized")
   }
@@ -16,7 +17,7 @@ class RabbitConnection {
   }
 
   public getChannel(): Channel {
-    return this.channel;z
+    return this.channel;
   }
  
 }
