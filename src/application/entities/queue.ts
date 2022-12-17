@@ -1,11 +1,11 @@
-import { Message, QueueProps } from "../types/interfaces";
+import { Payload, QueueProps } from "../types/interfaces";
 
 export class Queue {
   private props: QueueProps;
   constructor(props: QueueProps) {
     this.props = {
       ...props,
-      message: props.message,
+      payload: props.payload,
       createdAt: props.createdAt ?? new Date(),
       updatedAt: props.updatedAt ?? new Date(),
       deletedAt: props.deletedAt ?? new Date(),
@@ -36,11 +36,11 @@ export class Queue {
     return this.props.topic;
   }
 
-  public get message(): Message {
-    return this.props.message;
+  public get payload(): Payload {
+    return this.props.payload;
   }
 
-  public set message(value: Message) {
-    this.props.message = value;
+  public set payload(value: Payload) {
+    this.props.payload = value;
   }
 }

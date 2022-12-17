@@ -1,16 +1,19 @@
+import { UserProps } from "@/application/types/interfaces";
+import { Replace } from "@/helpers/Replace";
+import { resolvePromise } from "@/helpers/Resolve";
 import { DataSource } from "typeorm";
-import { Account } from "../entities/account.entity";
-import { User } from "../entities/user.entity";
-import UserService from "../services/user";
+import { Account } from "../infra/database/entities/account.entity";
+import { User } from "../infra/database/entities/user.entity";
+import UserServiceDB from "../infra/database/services/user";
 import { setupDataSource } from "./db-factory";
 
 describe("AccountService", () => {
   let source: DataSource;
-  let userService: UserService;
+  let userService: UserServiceDB;
 
   beforeAll(async () => {
     source = await setupDataSource([User, Account]);
-    userService = new UserService(source);
+    userService = new UserServiceDB(source);
   });
 
 
@@ -28,10 +31,15 @@ describe("AccountService", () => {
     password: "12345212121A1",
   };
 
-  async function createUser(data) {
-    const account = await userService.create(data);
+  const wrongUser = {
+    username: "ar",
+    password : "12345",
+  }
 
-    return account;
+  async function createUser(data: Replace<UserProps, { id?: string }>) {
+    const [account, error] = await resolvePromise(userService.create(data))
+
+    return error ? error : account;
   }
 
   // it("should match username with at least 3 characters", async () => {
@@ -47,18 +55,31 @@ describe("AccountService", () => {
   //   expect(account.password).toMatch(/^(?=.*[A-Z])(?=.*[0-9])(?=.{8,})/);
   // });
 
-  it("should return a valid instance", async () => {
+  it("should return a valid data of user", async () => {
     const account = await createUser(data);
 
-    expect(account.username.length).toBeGreaterThanOrEqual(3);
+    expect(account!.username.length).toBeGreaterThanOrEqual(3);
     expect(data.password).toMatch(/^(?=.*[A-Z])(?=.*[0-9])(?=.{8,})/);
     expect(account).toBeInstanceOf(User);
   });
 
   it("should return a session token", async () => {
     await createUser(data2);
-    const login = await userService.login(data.username, data.password);
+    const login = await userService.login({username: data!.username, password: data!.password});
 
     expect(typeof login).toBe("string");
+  });
+
+  it("should throw an error to create if username or password not match pre requirements", async () => {
+    const result = await createUser(wrongUser);
+
+    console.log(result)
+
+    expect(result).toBeInstanceOf(Error);
+    // try {
+    //   await createUser(wrongUser);
+    // } catch (e) {
+    //   expect(e).toBeInstanceOf(Error);
+    // }
   });
 });

@@ -1,13 +1,14 @@
 import connection from "../postgres";
 import authMiddleware from "../middlewares/authMiddleware";
-import TransactionService from "../services/transaction";
+import TransactionServiceDB from "../infra/database/services/transaction";
 import { Router } from "express";
-import QueueService from "@/services/queue";
+import RabbitService from "@/infra/database/services/queue";
+import { Payload } from "@/application/types/interfaces";
 
 const route = Router();
 export default function Transaction(app: Router) {
-  const transactionService = new TransactionService(connection);
-  const queueService = new QueueService();
+  const transactionService = new TransactionServiceDB(connection);
+  const queueService = new RabbitService();
   app.use("/transaction", route);
 
   route.post("/create", authMiddleware, async (req, res) => {
@@ -27,9 +28,9 @@ export default function Transaction(app: Router) {
   }	);
 
   route.get('/consume', async (req, res) => {
-    const messages = []
-    await queueService.consume('transaction', (msg) => {
-      messages.push(msg.content.toString());
+    const messages: any = []
+    await queueService.consume('transaction', (msg: any) => {
+      messages.push(JSON.parse(msg.content.toString()));
     });
 
 
@@ -37,11 +38,13 @@ export default function Transaction(app: Router) {
   })
 
   route.post('/queue', async (req, res) => {
-    const { message } = req.body;
-    
-    const queue = await queueService.publishInQueue('transaction', message);
-    await queueService.publishInExchange('ngcash', 'transaction', message);
+    const { payload } = req.body;
 
-    res.status(200).json(queue);
+    await transactionService.postInQueue(payload as Payload);
+    
+    // const queue = await queueService.publishInQueue({topic: 'transaction' ,queue: 'transaction', payload});
+    // await queueService.publishInExchange({exchange: 'ngcash', topic: 'transaction', queue:'transaction', payload});
+
+    res.status(200).json('queue');
   })
 }

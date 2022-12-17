@@ -1,18 +1,46 @@
 import { DataSource, Repository } from "typeorm";
 import AccountService from "./account";
 import { Transaction } from "../entities/transaction.entity";
-import { HttpError } from "../error/http";
-import validation from "../validation/transaction";
-import UserService from "./user";
+import { HttpError } from "../../../error/http";
+import validation from "../../../validation/transaction";
+import UserServiceDB from "./user";
+import { TransactionService } from "@/application/repositories/transaction.repository";
+import RabbitService from "./queue";
+import { Payload } from "@/application/types/interfaces";
 
-export default class TransactionService {
-  private userService: UserService;
+export default class TransactionServiceDB implements TransactionService {
+  private userService: UserServiceDB;
   private accountService: AccountService;
+  private queueService: RabbitService
   private transactionRepository: Repository<Transaction>;
   constructor(source: DataSource) {
-    this.userService = new UserService(source);
+    this.userService = new UserServiceDB(source);
     this.accountService = new AccountService(source);
+    this.queueService = new RabbitService();
     this.transactionRepository = source.getRepository(Transaction);
+  }
+
+  async postInQueue(payload: Payload) {
+
+    try {
+      await this.queueService.publishInQueue({topic: 'transaction' ,queue: 'transaction', payload});
+      await this.queueService.publishInExchange({exchange: 'ngcash', topic: 'transaction', queue:'transaction', payload});
+      setInterval ( async () => { await this.consumeQueueTransaction() }, 2000);
+    } catch (error: any) {
+        throw new HttpError(error.status, error.message);
+    }
+  }
+
+  async consumeQueueTransaction() {
+    const messages: any = []
+    await this.queueService.consume('transaction', (msg: any) => {
+      const { creditedAccount, debitedAccount, value } = JSON.parse(msg.content.toString());
+      console.log(creditedAccount, debitedAccount, value)
+      this.create(creditedAccount, debitedAccount, value)
+      messages.push(JSON.parse(msg.content.toString()));
+    });
+
+    return messages;
   }
 
   async create(creditedAccount: string, debitedAccount: string, value: number) {
@@ -55,7 +83,7 @@ export default class TransactionService {
 
       return transaction;
       // this.transactionRepository.update(transaction.id, { status: "success" });
-    } catch (error) {
+    } catch (error: any) {
       await rollback();
 
       // this.transactionRepository.update(transaction.id, { status: "failed" });
@@ -73,7 +101,7 @@ export default class TransactionService {
     offset = (offset - 1) * limit;
     const user = await this.userService.findOneById(userId);
 
-    const camelToSnakeCase = (str) =>
+    const camelToSnakeCase = (str: string) =>
       str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
     const converted = camelToSnakeCase(type);
 
@@ -94,7 +122,7 @@ export default class TransactionService {
         where t.${converted} = $1
         limit $2 offset $3;
         `,
-        [user.accountId, limit, offset]
+        [user!.accountId, limit, offset]
       );
 
       const total = await this.transactionRepository.query(
@@ -102,7 +130,7 @@ export default class TransactionService {
         select count(*) from transactions as t
         where t.${converted} = $1;
         `,
-        [user.accountId]
+        [user!.accountId]
       );
 
       return {
@@ -129,7 +157,7 @@ export default class TransactionService {
       order by t.created_at desc
       limit $2 offset $3;
       `,
-      [user.accountId, limit, offset]
+      [user!.accountId, limit, offset]
     );
 
     const total = await this.transactionRepository.query(
@@ -138,7 +166,7 @@ export default class TransactionService {
       where t.credited_account = $1
       or t.debited_account = $1;
       `,
-      [user.accountId]
+      [user!.accountId]
     );
 
     return {

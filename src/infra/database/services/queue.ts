@@ -20,21 +20,21 @@ export default class RabbitService implements QueueService {
 
   async publishInQueue({
     queue,
-    message,
+    payload,
   }: Replace<Queue, { exchange?: string; id?: string }>): Promise<boolean> {
-    console.log(queue, message.body);
+    console.log('payloadson',payload)
     return this.rabbitService
       .getChannel()
-      .sendToQueue(queue, Buffer.from(message.body));
+      .sendToQueue(queue, Buffer.from(JSON.stringify(payload)));
   }
 
   async publishInExchange({
     exchange,
     topic,
-    message,
+    payload,
   }: Replace<Queue, { id?: string }>): Promise<boolean> {
     return this.rabbitService
       .getChannel()
-      .publish(exchange, topic, Buffer.from(message.body));
+      .publish(exchange, topic, Buffer.from(JSON.stringify(payload)));
   }
 }

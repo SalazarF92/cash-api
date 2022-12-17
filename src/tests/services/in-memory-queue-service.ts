@@ -5,9 +5,9 @@ import { Replace } from "@/helpers/Replace";
 export class InMemoryQueueService implements QueueService {
   private queue: Partial<Queue>[] = [];
 
-  async consume({ message }: Queue, callback: (msg: any) => any): Promise<any> {
+  async consume(queue: string, callback: (msg: any) => any): Promise<any> {
     this.queue.shift();
-    return callback(message.body);
+    return callback(queue);
   }
 
   async publishInQueue(
@@ -19,6 +19,6 @@ export class InMemoryQueueService implements QueueService {
 
   async publishInExchange(queue: any): Promise<Queue> {
     this.queue.push(queue);
-    return queue
+    return queue;
   }
 }

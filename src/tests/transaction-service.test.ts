@@ -1,24 +1,20 @@
 import { setupDataSource } from "./db-factory";
-import { Transaction } from "../entities/transaction.entity";
-import AccountService from "../services/account";
-import UserService from "../services/user";
+import { Transaction } from "../infra/database/entities/transaction.entity";
+import UserServiceDB from "../infra/database/services/user";
 import { DataSource } from "typeorm";
-import { Account } from "../entities/account.entity";
-import { User } from "../entities/user.entity";
-import TransactionService from "../services/transaction";
-import authMiddleware from "../middlewares/authMiddleware";
-import { NextFunction, Request, Response } from "express";
+import { Account } from "../infra/database/entities/account.entity";
+import { User } from "../infra/database/entities/user.entity";
+import TransactionServiceDB from "../infra/database/services/transaction";
 
 describe("TransactionService", () => {
   let source: DataSource;
-  let userService: UserService;
-  let accountService: AccountService;
-  let transactionService: TransactionService;
+  let userService: UserServiceDB;
+  let transactionService: TransactionServiceDB;
 
   beforeAll(async () => {
     source = await setupDataSource([User, Account, Transaction]);
-    userService = new UserService(source);
-    transactionService = new TransactionService(source);
+    userService = new UserServiceDB(source);
+    transactionService = new TransactionServiceDB(source);
   });
 
     beforeEach(async () => {
@@ -47,8 +43,8 @@ describe("TransactionService", () => {
     const { account1, account2 } = await createUsers();
 
     const transaction = await transactionService.create(
-      account1.accountId,
-      account2.accountId,
+      account1!.accountId,
+      account2!.accountId,
       30
     );
 

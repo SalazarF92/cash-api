@@ -1,14 +1,17 @@
 import { DataSource, Repository } from "typeorm";
 import { compareSync, hashSync } from "bcryptjs";
-import { HttpError } from "../error/http";
+import { HttpError } from "../../../error/http";
 import * as jose from "jose";
-import { JWT_SECRET } from "../settings";
+import { JWT_SECRET } from "../../../settings";
 import { User } from "../entities/user.entity";
 import AccountService from "./account";
 import { validate } from "class-validator";
 import { createSecretKey } from "crypto";
+import { UserProps } from "@/application/types/interfaces";
+import { UserService } from "@/application/repositories/user-repository";
+import { Replace } from "@/helpers/Replace";
 
-export default class UserService {
+export default class UserServiceDB implements UserService {
   private userRepository: Repository<User>;
   private accountService: AccountService;
   constructor(source: DataSource) {
@@ -16,29 +19,26 @@ export default class UserService {
     this.accountService = new AccountService(source);
   }
 
-  public async login(username: string, password: string) {
-
+  public async login({ username, password }: Replace<UserProps, { id?: string }>) {
     const user = await this.userRepository
-    .createQueryBuilder("user")
-    .addSelect(["user.password"])
-    .where("user.username = :username", { username })
-    .getOne();
+      .createQueryBuilder("user")
+      .addSelect(["user.password"])
+      .where("user.username = :username", { username })
+      .getOne();
     // const user = await this.userRepository.findOne({ where: { username } });
-
+    
     if (!user) throw new HttpError(404, "User not found");
 
     const isPasswordValid = compareSync(password, user.password);
 
     if (!isPasswordValid) throw new HttpError(400, "Invalid password");
 
-    delete user.password;
-
     const sessionToken = this.generateSessionToken({ id: user.id });
 
     return sessionToken;
   }
 
-  async create({ username, password }: Partial<User>) {
+  async create({ username, password }: Replace<UserProps, { id?: string }>): Promise<User | null>{
     const usernameAlreadExists = await this.userRepository.findOne({
       where: { username: username },
     });
@@ -71,8 +71,7 @@ export default class UserService {
     return userWithAccount;
   }
 
-  public async findOneById(id: string, withPasword = false) {
-
+  public async findOneById(id : string, withPasword = false) {
     const user = this.userRepository
       .createQueryBuilder("user")
       .addSelect(withPasword ? ["user.password"] : [])
@@ -80,14 +79,12 @@ export default class UserService {
       .where("user.id = :id", { id })
       .getOne();
 
-      
-
     if (!user) throw new HttpError(404, "User not found");
 
     return user;
   }
 
-  private async generateSessionToken(payload: any) {
+  public async generateSessionToken(payload: any) {
     const token = await new jose.SignJWT(payload)
       .setProtectedHeader({ alg: "HS256" })
       .setIssuedAt()

@@ -5,3 +5,4 @@ export const PGPASSWORD = process.env.PGPASSWORD;
 export const PGDATABASE = process.env.PGDATABASE;
 export const PGPORT = Number(process.env.PGPORT);
 export const PGHOST =  process.env.PGHOST || "localhost";
+export const DSN_RABBIT = process.env.DSN_RABBIT || "amqp://localhost";
