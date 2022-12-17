@@ -25,7 +25,6 @@ export default class UserServiceDB implements UserService {
       .addSelect(["user.password"])
       .where("user.username = :username", { username })
       .getOne();
-    // const user = await this.userRepository.findOne({ where: { username } });
     
     if (!user) throw new HttpError(404, "User not found");
 

@@ -1,6 +1,6 @@
-import connection from "../postgres";
-import authMiddleware from "../middlewares/authMiddleware";
-import UserServiceDB from "../infra/database/services/user";
+import connection from "../../postgres";
+import authMiddleware from "../../middlewares/authMiddleware";
+import UserServiceDB from "../../infra/database/services/user";
 import { Router } from "express";
 
 const route = Router();

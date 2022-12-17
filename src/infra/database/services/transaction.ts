@@ -2,16 +2,15 @@ import { DataSource, Repository } from "typeorm";
 import AccountService from "./account";
 import { Transaction } from "../entities/transaction.entity";
 import { HttpError } from "../../../error/http";
-import validation from "../../../validation/transaction";
 import UserServiceDB from "./user";
 import { TransactionService } from "@/application/repositories/transaction.repository";
-import RabbitService from "./queue";
+import RabbitService from "../../queue/queue";
 import { Payload } from "@/application/types/interfaces";
 
 export default class TransactionServiceDB implements TransactionService {
   private userService: UserServiceDB;
   private accountService: AccountService;
-  private queueService: RabbitService
+  private queueService: RabbitService;
   private transactionRepository: Repository<Transaction>;
   constructor(source: DataSource) {
     this.userService = new UserServiceDB(source);
@@ -21,22 +20,47 @@ export default class TransactionServiceDB implements TransactionService {
   }
 
   async postInQueue(payload: Payload) {
-
     try {
-      await this.queueService.publishInQueue({topic: 'transaction' ,queue: 'transaction', payload});
-      await this.queueService.publishInExchange({exchange: 'ngcash', topic: 'transaction', queue:'transaction', payload});
-      setInterval ( async () => { await this.consumeQueueTransaction() }, 2000);
+      await this.queueService.publishInQueue({
+        topic: "transaction",
+        queue: "transaction",
+        payload,
+      });
+      await this.queueService.publishInExchange({
+        exchange: "ngcash",
+        topic: "transaction",
+        queue: "transaction",
+        payload,
+      });
+      await this.queueService.consumeInterval(
+        "transaction",
+        async (msg: any) => {
+          const { creditedAccount, debitedAccount, value } = JSON.parse(
+            msg.content.toString()
+          );
+
+          try {
+            await this.create(creditedAccount, debitedAccount, value);
+            return [true, null];
+          } catch (error) {
+            return [null, error];
+          }
+        },
+        2000
+      );
     } catch (error: any) {
-        throw new HttpError(error.status, error.message);
+      throw new HttpError(error.status, error.message);
     }
   }
 
   async consumeQueueTransaction() {
-    const messages: any = []
-    await this.queueService.consume('transaction', (msg: any) => {
-      const { creditedAccount, debitedAccount, value } = JSON.parse(msg.content.toString());
-      console.log(creditedAccount, debitedAccount, value)
-      this.create(creditedAccount, debitedAccount, value)
+    const messages: any = [];
+    await this.queueService.consume("transaction", async (msg: any) => {
+      const { creditedAccount, debitedAccount, value } = JSON.parse(
+        msg.content.toString()
+      );
+
+      await this.create(creditedAccount, debitedAccount, value);
       messages.push(JSON.parse(msg.content.toString()));
     });
 
@@ -44,21 +68,12 @@ export default class TransactionServiceDB implements TransactionService {
   }
 
   async create(creditedAccount: string, debitedAccount: string, value: number) {
-    const withdrawFromAccount = await this.accountService.findById(
-      debitedAccount
+    const transaction = await this.accountService.validation(
+      debitedAccount,
+      creditedAccount,
+      value
     );
-    const depositToAccount = await this.accountService.findById(
-      creditedAccount
-    );
-
-    if (!withdrawFromAccount || !depositToAccount) {
-      throw new HttpError(
-        404,
-        `User Account ${creditedAccount || debitedAccount} not found`
-      );
-    }
-
-    validation(withdrawFromAccount, depositToAccount, value);
+    const { withdrawFromAccount, depositToAccount } = transaction;
 
     const { connect, start, rollback, commit, release } =
       await this.accountService.transaction();

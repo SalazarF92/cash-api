@@ -41,7 +41,6 @@ describe("AccountService", () => {
 
   it("should return validation in authMiddleware", async () => {
     const user = await createUser(rightUser);
-    console.log(user)
     const sessionToken = await userService.login({username: user!.username, password: rightUser!.password});
 
     req = {

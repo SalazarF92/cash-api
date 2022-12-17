@@ -1,4 +1,5 @@
 import express from "express";
+import "express-async-errors";
 import { rabbitConnection } from "./queue/rabbit";
 import { PORT } from "./settings";
 

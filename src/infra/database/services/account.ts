@@ -1,3 +1,4 @@
+import validateTransaction from "@/validation/transaction";
 import { DataSource, QueryRunner, Repository } from "typeorm";
 import { HttpError } from "../../../error/http";
 import { Account } from "../entities/account.entity";
@@ -54,6 +55,28 @@ export default class AccountService {
       rollback: () => this.queryRunner?.rollbackTransaction(),
       release: () => this.queryRunner?.release(),
     };
+  }
+
+  async validation(
+    debitedAccount: string,
+    creditedAccount: string,
+    value: number
+  ): Promise<{withdrawFromAccount: Account, depositToAccount: Account, value: number}> {
+    try {
+      const withdrawFromAccount = await this.findById(debitedAccount);
+      const depositToAccount = await this.findById(creditedAccount);
+      if (!withdrawFromAccount || !depositToAccount) {
+        throw new HttpError(
+          404,
+          `User Account ${creditedAccount || debitedAccount} not found`
+        );
+      }
+      const result = validateTransaction(withdrawFromAccount, depositToAccount, value);
+      if (result[1]) throw new HttpError(result[1].status, result[1].message);
+      return { withdrawFromAccount, depositToAccount, value };
+    } catch (error: any) {
+      throw new HttpError(error.status, error.message);
+    }
   }
 
   async update(id: string, value: number) {

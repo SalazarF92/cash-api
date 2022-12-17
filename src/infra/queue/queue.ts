@@ -1,5 +1,6 @@
 import { Queue } from "@/application/entities/queue";
 import { QueueService } from "@/application/repositories/queue-repository";
+import { HttpError } from "@/error/http";
 import { Replace } from "@/helpers/Replace";
 import { rabbitConnection } from "@/queue/rabbit";
 import { Message } from "amqplib";
@@ -7,7 +8,10 @@ import { Replies } from "amqplib/properties";
 
 export default class RabbitService implements QueueService {
   private rabbitService = rabbitConnection;
-  async consume(queue: string, callback: (msg: Message) => any): Promise<Replies.Consume> {
+  async consume(
+    queue: string,
+    callback: (msg: Message) => any
+  ): Promise<Replies.Consume> {
     const channel = this.rabbitService.getChannel();
     await channel.assertQueue(queue);
     const message = await channel.consume(queue, (msg: Message | null) => {
@@ -18,11 +22,29 @@ export default class RabbitService implements QueueService {
     return message;
   }
 
+  async consumeInterval(
+    queue: string,
+    callback: (msg: Message) => any,
+    interval: number
+  ): Promise<void> {
+    try {
+      const channel = this.rabbitService.getChannel();
+      await channel.assertQueue(queue);
+      const message = await channel.get(queue);
+      if (message) {
+        const result = await callback(message);
+        channel.ack(message);
+        if (result[1]) throw new HttpError(result[1].status, result[1].message);
+      }
+    } catch (error: any) {
+      throw new HttpError(error.status, error.message);
+    }
+  }
+
   async publishInQueue({
     queue,
     payload,
   }: Replace<Queue, { exchange?: string; id?: string }>): Promise<boolean> {
-    console.log('payloadson',payload)
     return this.rabbitService
       .getChannel()
       .sendToQueue(queue, Buffer.from(JSON.stringify(payload)));
