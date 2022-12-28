@@ -1,7 +1,7 @@
 import { Matches, MinLength } from "class-validator";
 import { Column, Entity, JoinColumn, OneToOne } from "typeorm";
 import { Account } from "./account.entity";
-import { Base } from "../../../base/base.entity";
+import { Base } from "./base/base.entity";
 
 @Entity({ name: "users" })
 export class User extends Base {

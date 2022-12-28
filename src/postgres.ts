@@ -11,7 +11,7 @@ const connection = new DataSource({
   username: PGUSER,
   password: PGPASSWORD,
   database: PGDATABASE,
-  entities: [`${__dirname.indexOf('src') != -1 ? './src/infra/database/entities/**/*.{ts,js}' :  './build/infra/database//entities/**/*.{ts,js}'}`],
+  entities: [`${__dirname.indexOf('src') != -1 ? './src/infra/database/entities/**/*.{ts,js}' :  './build/infra/database/entities/**/*.{ts,js}'}`],
   synchronize: true,
   logging: false,
 });

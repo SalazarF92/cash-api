@@ -3,7 +3,7 @@ import AccountService from "./account";
 import { Transaction } from "../entities/transaction.entity";
 import { HttpError } from "../../../error/http";
 import UserServiceDB from "./user";
-import { TransactionService } from "@/application/repositories/transaction.repository";
+import { TransactionService } from "@/application/service-repositories/transaction.repository";
 import RabbitService from "../../queue/queue";
 import { Payload } from "@/application/types/interfaces";
 

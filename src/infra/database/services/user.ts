@@ -8,8 +8,8 @@ import AccountService from "./account";
 import { validate } from "class-validator";
 import { createSecretKey } from "crypto";
 import { UserProps } from "@/application/types/interfaces";
-import { UserService } from "@/application/repositories/user-repository";
-import { Replace } from "@/helpers/Replace";
+import { UserService } from "@/application/service-repositories/user-repository";
+import { Replace } from "@/common/helpers/Replace";
 
 export default class UserServiceDB implements UserService {
   private userRepository: Repository<User>;

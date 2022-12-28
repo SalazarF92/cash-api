@@ -1,7 +1,7 @@
 import { Queue } from "@/application/entities/queue";
-import { QueueService } from "@/application/repositories/queue-repository";
+import { QueueService } from "@/application/service-repositories/queue-repository";
 import { HttpError } from "@/error/http";
-import { Replace } from "@/helpers/Replace";
+import { Replace } from "@/common/helpers/Replace";
 import { rabbitConnection } from "@/queue/rabbit";
 import { Message } from "amqplib";
 import { Replies } from "amqplib/properties";

@@ -1,4 +1,4 @@
-import validateTransaction from "@/validation/transaction";
+import validateTransaction from "@/common/validation/transaction";
 import { DataSource, QueryRunner, Repository } from "typeorm";
 import { HttpError } from "../../../error/http";
 import { Account } from "../entities/account.entity";

@@ -1,6 +1,6 @@
 import { UserProps } from "@/application/types/interfaces";
-import { Replace } from "@/helpers/Replace";
-import { resolvePromise } from "@/helpers/Resolve";
+import { Replace } from "@/common/helpers/Replace";
+import { resolvePromise } from "@/common/helpers/Resolve";
 import { DataSource } from "typeorm";
 import { Account } from "../infra/database/entities/account.entity";
 import { User } from "../infra/database/entities/user.entity";

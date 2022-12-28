@@ -1,4 +1,4 @@
-import { Replace } from "@/helpers/Replace";
+import { Replace } from "@/common/helpers/Replace";
 
 export interface BaseProps {
   id: string;

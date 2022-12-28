@@ -1,6 +1,6 @@
 import { Queue } from "@/application/entities/queue";
-import { QueueService } from "@/application/repositories/queue-repository";
-import { Replace } from "@/helpers/Replace";
+import { QueueService } from "@/application/service-repositories/queue-repository";
+import { Replace } from "@/common/helpers/Replace";
 
 export class InMemoryQueueService implements QueueService {
   private queue: Partial<Queue>[] = [];

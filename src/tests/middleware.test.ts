@@ -6,7 +6,7 @@ import UserServiceDB from "../infra/database/services/user";
 import { setupDataSource } from "./db-factory";
 import { NextFunction, Request, Response } from "express";
 import { UserProps } from "@/application/types/interfaces";
-import { Replace } from "@/helpers/Replace";
+import { Replace } from "@/common/helpers/Replace";
 
 describe("AccountService", () => {
   let source: DataSource;
