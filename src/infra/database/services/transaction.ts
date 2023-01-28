@@ -19,6 +19,9 @@ export default class TransactionServiceDB implements TransactionService {
     this.transactionRepository = source.getRepository(Transaction);
   }
 
+  // NECESSÁRIO FAZER UM MÉTODO QUE VERIFIQUE SE EXISTE TRANSAÇÕES PENDENTES
+  // CRIAR UM TESTE E2E PARA TRANSAÇÕES SIMULTANEAS DE CONTAS DIFERENTES.
+
   async postInQueue(payload: Payload) {
     try {
       await this.queueService.publishInQueue({

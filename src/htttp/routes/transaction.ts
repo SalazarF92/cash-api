@@ -11,12 +11,12 @@ export default function Transaction(app: Router) {
   const queueService = new RabbitService();
   app.use("/transaction", route);
 
-  route.post("/create", authMiddleware, async (req: any, res: any) => {
-    const { creditedAccount, debitedAccount, value } = req.body;
-    const user = await transactionService.create(creditedAccount, debitedAccount, value);
+  // route.post("/create", authMiddleware, async (req: any, res: any) => {
+  //   const { creditedAccount, debitedAccount, value } = req.body;
+  //   const user = await transactionService.create(creditedAccount, debitedAccount, value);
 
-    res.status(200).json(user);
-  });
+  //   res.status(200).json(user);
+  // });
 
   route.get('/list', authMiddleware, async (req: any, res: any) => {
 
@@ -37,7 +37,7 @@ export default function Transaction(app: Router) {
     res.status(200).json(messages);
   })
 
-  route.post('/queue', async (req: any, res: any) => {
+  route.post('/create', async (req: any, res: any) => {
     const { payload } = req.body;
     try {
       const transaction = await transactionService.postInQueue(payload as Payload);
