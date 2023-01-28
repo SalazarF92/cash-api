@@ -27,7 +27,7 @@ const authMiddleware = async (
 
     
     return next();
-  } catch (error) {
+  } catch (error: any) {
     return next(new HttpError(error.status, error.message));
   }
 };

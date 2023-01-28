@@ -27,16 +27,16 @@ services:
       context: .
       dockerfile: Dockerfile.api
     environment:
-      - JWT_SECRET=P4523J542905I243R402
-      - API_URL=http://localhost/
-      - PORT=3000
-      - LOCAL_URL=http://localhost:3000/
-      - SECRET_KEY=k34j2p3k423pi4234uy8293y423oihj32oi4y2304932480h234234jkp32u40
-      - PGUSER=cashier
-      - PGPASSWORD=cashier
-      - PGHOST=ng-postgres
-      - PGPORT=5432
-      - PGDATABASE=ngcash
+      - JWT_SECRET=${JWT_SECRET}
+      - API_URL=${API_URL}
+      - PORT=${PORT}
+      - LOCAL_URL=${LOCAL_URL}
+      - SECRET_KEY=${SECRET_KEY}
+      - PGUSER=${PGUSER}
+      - PGPASSWORD=${PGPASSWORD}
+      - PGHOST=${PGHOST}
+      - PGPORT=${PGPORT}
+      - PGDATABASE=${PGDATABASE}
     command: npm run start
     ports: 
         - "3000:3000"

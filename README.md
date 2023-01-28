@@ -20,6 +20,9 @@ The API also includes CRUD functionality for both users and transactions, allowi
 
 Running the project is as simple as running the command 'docker-compose up', which will start the API on the default port of 3000. This makes it easy to get up and running with the API, without the need for complex setup or configuration."
 
+
+Running the project is as simple as running the command 'docker-compose up', which will start the API on the default port of 3000. This makes it easy to get up and running with the API, without the need for complex setup or configuration."
+
 Obs:. Must have the DSN_RABBIT key to work properly with queues.
 
 **Background in:** Nodejs, Express, Jest

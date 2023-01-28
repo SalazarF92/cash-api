@@ -1,18 +1,20 @@
 import authMiddleware from "../middlewares/authMiddleware";
 import { DataSource } from "typeorm";
-import { Account } from "../entities/account.entity";
-import { User } from "../entities/user.entity";
-import UserService from "../services/user";
+import { Account } from "../infra/database/entities/account.entity";
+import { User } from "../infra/database/entities/user.entity";
+import UserServiceDB from "../infra/database/services/user";
 import { setupDataSource } from "./db-factory";
 import { NextFunction, Request, Response } from "express";
+import { UserProps } from "@/application/types/interfaces";
+import { Replace } from "@/common/helpers/Replace";
 
 describe("AccountService", () => {
   let source: DataSource;
-  let userService: UserService;
+  let userService: UserServiceDB;
 
   beforeAll(async () => {
     source = await setupDataSource([User, Account]);
-    userService = new UserService(source);
+    userService = new UserServiceDB(source);
   });
 
   // beforeEach(async () => {
@@ -23,14 +25,13 @@ describe("AccountService", () => {
     await source.destroy();
   });
 
-  const data = {
+  const rightUser = {
     username: "arii",
     password: "12345212121A",
   };
 
-  async function createUser() {
-    const account = await userService.create(data);
-
+  async function createUser(user: Replace<UserProps , { id?: string }>)  {
+    const account = await userService.create(user);
     return account;
   }
 
@@ -39,8 +40,8 @@ describe("AccountService", () => {
   let next: NextFunction;
 
   it("should return validation in authMiddleware", async () => {
-    await createUser();
-    const sessionToken = await userService.login(data.username, data.password);
+    const user = await createUser(rightUser);
+    const sessionToken = await userService.login({username: user!.username, password: rightUser!.password});
 
     req = {
       headers: {

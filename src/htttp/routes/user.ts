@@ -1,11 +1,11 @@
-import connection from "../postgres";
-import authMiddleware from "../middlewares/authMiddleware";
-import UserService from "../services/user";
+import connection from "../../postgres";
+import authMiddleware from "../../middlewares/authMiddleware";
+import UserServiceDB from "../../infra/database/services/user";
 import { Router } from "express";
 
 const route = Router();
 export default function User(app: Router) {
-  const userService = new UserService(connection);
+  const userService = new UserServiceDB(connection);
   app.use("/user", route);
 
   route.post("/create", async (req, res) => {
@@ -19,7 +19,7 @@ export default function User(app: Router) {
   route.post("/login", async (req: any, res: any) => {
     const { username, password } = req.body;
 
-    const sessionToken = await userService.login(username, password);
+    const sessionToken = await userService.login({username, password});
 
     res.status(200).json(sessionToken);
   });

@@ -1,36 +1,82 @@
 import { DataSource, Repository } from "typeorm";
 import AccountService from "./account";
 import { Transaction } from "../entities/transaction.entity";
-import { HttpError } from "../error/http";
-import validation from "../validation/transaction";
-import UserService from "./user";
+import { HttpError } from "../../../error/http";
+import UserServiceDB from "./user";
+import { TransactionService } from "@/application/service-repositories/transaction.repository";
+import RabbitService from "../../queue/queue";
+import { Payload } from "@/application/types/interfaces";
 
-export default class TransactionService {
-  private userService: UserService;
+export default class TransactionServiceDB implements TransactionService {
+  private userService: UserServiceDB;
   private accountService: AccountService;
+  private queueService: RabbitService;
   private transactionRepository: Repository<Transaction>;
   constructor(source: DataSource) {
-    this.userService = new UserService(source);
+    this.userService = new UserServiceDB(source);
     this.accountService = new AccountService(source);
+    this.queueService = new RabbitService();
     this.transactionRepository = source.getRepository(Transaction);
   }
 
-  async create(creditedAccount: string, debitedAccount: string, value: number) {
-    const withdrawFromAccount = await this.accountService.findById(
-      debitedAccount
-    );
-    const depositToAccount = await this.accountService.findById(
-      creditedAccount
-    );
+  // NECESSÁRIO FAZER UM MÉTODO QUE VERIFIQUE SE EXISTE TRANSAÇÕES PENDENTES
+  // CRIAR UM TESTE E2E PARA TRANSAÇÕES SIMULTANEAS DE CONTAS DIFERENTES.
 
-    if (!withdrawFromAccount || !depositToAccount) {
-      throw new HttpError(
-        404,
-        `User Account ${creditedAccount || debitedAccount} not found`
+  async postInQueue(payload: Payload) {
+    try {
+      await this.queueService.publishInQueue({
+        topic: "transaction",
+        queue: "transaction",
+        payload,
+      });
+      await this.queueService.publishInExchange({
+        exchange: "ngcash",
+        topic: "transaction",
+        queue: "transaction",
+        payload,
+      });
+      await this.queueService.consumeInterval(
+        "transaction",
+        async (msg: any) => {
+          const { creditedAccount, debitedAccount, value } = JSON.parse(
+            msg.content.toString()
+          );
+
+          try {
+            await this.create(creditedAccount, debitedAccount, value);
+            return [true, null];
+          } catch (error) {
+            return [null, error];
+          }
+        },
+        2000
       );
+    } catch (error: any) {
+      throw new HttpError(error.status, error.message);
     }
+  }
 
-    validation(withdrawFromAccount, depositToAccount, value);
+  async consumeQueueTransaction() {
+    const messages: any = [];
+    await this.queueService.consume("transaction", async (msg: any) => {
+      const { creditedAccount, debitedAccount, value } = JSON.parse(
+        msg.content.toString()
+      );
+
+      await this.create(creditedAccount, debitedAccount, value);
+      messages.push(JSON.parse(msg.content.toString()));
+    });
+
+    return messages;
+  }
+
+  async create(creditedAccount: string, debitedAccount: string, value: number) {
+    const transaction = await this.accountService.validation(
+      debitedAccount,
+      creditedAccount,
+      value
+    );
+    const { withdrawFromAccount, depositToAccount } = transaction;
 
     const { connect, start, rollback, commit, release } =
       await this.accountService.transaction();
@@ -55,7 +101,7 @@ export default class TransactionService {
 
       return transaction;
       // this.transactionRepository.update(transaction.id, { status: "success" });
-    } catch (error) {
+    } catch (error: any) {
       await rollback();
 
       // this.transactionRepository.update(transaction.id, { status: "failed" });
@@ -73,7 +119,7 @@ export default class TransactionService {
     offset = (offset - 1) * limit;
     const user = await this.userService.findOneById(userId);
 
-    const camelToSnakeCase = (str) =>
+    const camelToSnakeCase = (str: string) =>
       str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
     const converted = camelToSnakeCase(type);
 
@@ -94,7 +140,7 @@ export default class TransactionService {
         where t.${converted} = $1
         limit $2 offset $3;
         `,
-        [user.accountId, limit, offset]
+        [user!.accountId, limit, offset]
       );
 
       const total = await this.transactionRepository.query(
@@ -102,7 +148,7 @@ export default class TransactionService {
         select count(*) from transactions as t
         where t.${converted} = $1;
         `,
-        [user.accountId]
+        [user!.accountId]
       );
 
       return {
@@ -129,7 +175,7 @@ export default class TransactionService {
       order by t.created_at desc
       limit $2 offset $3;
       `,
-      [user.accountId, limit, offset]
+      [user!.accountId, limit, offset]
     );
 
     const total = await this.transactionRepository.query(
@@ -138,7 +184,7 @@ export default class TransactionService {
       where t.credited_account = $1
       or t.debited_account = $1;
       `,
-      [user.accountId]
+      [user!.accountId]
     );
 
     return {
